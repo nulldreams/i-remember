@@ -1,0 +1,10 @@
+<div id="columns">
+	<figure ng-repeat="memoria in publicacoes">
+		<a href="/memoria/{{ memoria.nome_url }}" target="_blank">
+		<img src="{{ memoria.imagem }}">
+		</a>
+		<figcaption>
+			{{ memoria.nome_original }}
+		</figcaption>
+	</figure>
+</div>
