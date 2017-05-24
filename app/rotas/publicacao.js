@@ -1,23 +1,22 @@
 const Publicacao = require('../models/publicacao')
 const moment = require('moment')
-var knox = require('knox');
-var client = knox.createClient({
-    key: 'key',
-    secret: 'secret',
-    bucket: 'bucket'
+const knox = require('knox');
+const client = knox.createClient({
+    key: '__key',
+    secret: '__secret',
+    bucket: '__bucket'
 })
 
 exports.ExibirPublicacao = (req, res) => {
-      let id = req.params.id
-      ConsultarPorId(id, (retorno) => {
-          res.json(retorno)
-      })
+    let id = req.params.id
+    ConsultarPorId(id, (retorno) => {
+        res.json(retorno)
+    })
 }
 
 
 exports.ListarPublicacoes = (req, res) => {
     TodasPublicacoes((retorno) => {
-        console.log(retorno)
         res.json({ publicacoes: retorno })
     })
 }
@@ -29,7 +28,6 @@ exports.ListarPublicacoesCategoria = (req, res) => {
 }
 
 exports.Publicar = (req, res) => {
-    console.log('nome', req.body.nome)
     let nome = req.body.nome.replace(/[^\w\s]/gi, '').replace(/ /g, '-').toLowerCase()
     let nPub = new Publicacao({
         nome_original: req.body.nome,
@@ -46,6 +44,32 @@ exports.Publicar = (req, res) => {
     })
 }
 
+exports.Curtir = (req, res) => {
+    let id = req.body.id
+    Curtir(id, req.body.usuario, (retorno) => {
+        res.json(retorno)
+    })
+}
+var Curtir = (id, usuario, callback) => {
+    console.log(id, usuario)
+    Publicacao.findById(id, (err, publicacao) => {
+        if (publicacao.curtidores.indexOf(usuario) == -1) {
+            publicacao.curtidores.push(usuario)
+            publicacao.curtidas += 1
+
+            publicacao.save((err) => {
+                if (err) callback(err)
+
+                callback({ success: true, message: 'Curtido.' })
+            })
+
+        } else callback({ success: false, message: 'Você já curtiu essa memória! :)' })
+    })
+    /* Publicacao.findByIdAndUpdate(id, { $inc: { curtidas: 1 } }, (err, data) => {
+         
+         callback(data)
+     })*/
+}
 
 var TodasPublicacoesFiltro = (filtro, callback) => {
     Publicacao.find({ 'categoria': filtro }, (err, publicacao) => {
@@ -71,6 +95,7 @@ var ConsultarPorId = (id, callback) => {
 }
 
 var Publicar = (obj, req, callback) => {
+    console.log('Arquivo', req.body.memoria)
     UploadAmazon(req.file, (url) => {
         obj.imagem = url
 

@@ -9,6 +9,7 @@ var publicacaoSchema = mongoose.Schema({
     imagem: String,
     legenda: String,
     curtidas: { type: Number, default: 0 },
+    curtidores: [String],
     comentarios: [{
         usuario: String,
         mensagem: String,
